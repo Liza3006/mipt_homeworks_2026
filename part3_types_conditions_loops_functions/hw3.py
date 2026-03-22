@@ -8,6 +8,13 @@ INCORRECT_DATE_MSG = "Invalid date!"
 NOT_EXISTS_CATEGORY = "Category not exists!"
 OP_SUCCESS_MSG = "Added"
 
+TYPE_KEY = "type"
+AMOUNT_KEY = "amount"
+DATE_KEY = "date"
+CATEGORY_KEY = "category"
+INCOME_TYPE = "income"
+COST_TYPE = "cost"
+
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
     "Transport": ("Taxi", "Public transport", "Gas", "Car service"),
@@ -36,10 +43,7 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     feb_leap_days = 29
 
     parts = maybe_dt.split("-")
-    if len(parts) != date_parts_count:
-        return None
-
-    if not all(part.isdigit() for part in parts):
+    if (len(parts) != date_parts_count) or (not all(part.isdigit() for part in parts)):
         return None
 
     day = int(parts[0])
@@ -74,9 +78,14 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    financial_transactions_storage.append(
-        {"type": "income", "amount": amount, "date": date}
-    )
+
+    transaction = {
+        TYPE_KEY: INCOME_TYPE,
+        AMOUNT_KEY: amount,
+        DATE_KEY: date
+    }
+    financial_transactions_storage.append(transaction)
+    
     return OP_SUCCESS_MSG
 
 
@@ -102,9 +111,14 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
 
-    financial_transactions_storage.append(
-        {"type": "cost", "category": category_name, "amount": amount, "date": date}
-    )
+    transaction = {
+        TYPE_KEY: COST_TYPE,
+        CATEGORY_KEY: category_name,
+        AMOUNT_KEY: amount,
+        DATE_KEY: date
+    }
+    financial_transactions_storage.append(transaction)
+    
     return OP_SUCCESS_MSG
 
 
