@@ -91,11 +91,12 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    entry: dict[str, Any] = {}
-    entry["type"] = "income"
-    entry["amount"] = amount
-    entry["date"] = date
-    financial_transactions_storage.append(entry)
+    transaction = {
+        "type": "income",
+        "amount": amount,
+        "date": date
+    }
+    financial_transactions_storage.append(transaction)
     return OP_SUCCESS_MSG
 
 
@@ -121,12 +122,13 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
     if not _check_category(category_name):
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
-    entry: dict[str, Any] = {}
-    entry["type"] = "cost"
-    entry["category"] = category_name
-    entry["amount"] = amount
-    entry["date"] = date
-    financial_transactions_storage.append(entry)
+    transaction = {
+        "type": "cost",
+        "category": category_name,
+        "amount": amount,
+        "date": date
+    }
+    financial_transactions_storage.append(transaction)
     return OP_SUCCESS_MSG
 
 
@@ -137,9 +139,9 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
-def _is_before_date(transaction_date: tuple[int, int, int], query_date: tuple[int, int, int]) -> bool:
-    t_year, t_month, t_day = transaction_date
-    q_year, q_month, q_day = query_date
+def _is_before_date(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
+    t_year, t_month, t_day = t_date
+    q_year, q_month, q_day = q_date
     if t_year != q_year:
         return t_year < q_year
     if t_month != q_month:
@@ -163,15 +165,6 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     return capital
 
 
-def _get_month_income(transaction: dict[str, Any], target_year: int, target_month: int) -> float:
-    _, month, year = transaction["date"]
-    if transaction["type"] != "income":
-        return 0.0
-    if year == target_year and month == target_month:
-        return float(transaction["amount"])
-    return 0.0
-
-
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
     target_year = query_date[2]
     target_month = query_date[1]
@@ -180,43 +173,31 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        month_income += _get_month_income(transaction, target_year, target_month)
+        _, month, year = transaction["date"]
+        if transaction["type"] != "income":
+            continue
+        if year == target_year and month == target_month:
+            month_income += transaction["amount"]
     return month_income
 
 
-def _get_month_cost(transaction: dict[str, Any], target_year: int, target_month: int) -> tuple[float, str]:
-    _, month, year = transaction["date"]
-    if transaction["type"] != "cost":
-        return (0.0, "")
-    if year == target_year and month == target_month:
-        return (float(transaction["amount"]), transaction["category"])
-    return (0.0, "")
-
-
-def _get_month_transactions(query_date: tuple[int, int, int]) -> list[dict[str, Any]]:
+def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
     target_year = query_date[2]
     target_month = query_date[1]
-    month_transactions: list[dict[str, Any]] = []
+    month_cost = 0
+    costs: dict[str, float] = {}
 
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        amount, category = _get_month_cost(transaction, target_year, target_month)
-        if amount > 0.0:
-            month_transactions.append({"amount": amount, "category": category})
-
-    return month_transactions
-
-
-def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
-    month_cost = 0
-    costs: dict[str, float] = {}
-
-    for transaction in _get_month_transactions(query_date):
-        amount = transaction["amount"]
-        month_cost += amount
-        category = transaction["category"]
-        costs[category] = costs.get(category, 0) + amount
+        _, month, year = transaction["date"]
+        if transaction["type"] != "cost":
+            continue
+        if year == target_year and month == target_month:
+            amount = transaction["amount"]
+            month_cost += amount
+            category = transaction["category"]
+            costs[category] = costs.get(category, 0) + amount
 
     return month_cost, costs
 
@@ -249,13 +230,11 @@ def stats_handler(report_date: str) -> str:
     if query_date is None:
         return INCORRECT_DATE_MSG
 
-    stats = (
-        _calculate_capital(query_date),
-        _calculate_month_income(query_date),
-        *_calculate_month_cost(query_date)
-    )
+    capital = _calculate_capital(query_date)
+    month_income = _calculate_month_income(query_date)
+    month_cost, costs = _calculate_month_cost(query_date)
 
-    lines = _build_stats_lines(*stats, report_date)
+    lines = _build_stats_lines(capital, month_income, month_cost, costs, report_date)
     return "\n".join(lines)
 
 
@@ -314,4 +293,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
