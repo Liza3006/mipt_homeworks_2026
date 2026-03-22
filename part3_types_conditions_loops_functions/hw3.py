@@ -202,7 +202,7 @@ def _get_month_transactions(query_date: tuple[int, int, int]) -> list[dict[str, 
         if not transaction:
             continue
         amount, category = _get_month_cost(transaction, target_year, target_month)
-        if amount > 0:
+        if amount > 0.0:
             month_transactions.append({"amount": amount, "category": category})
 
     return month_transactions
@@ -314,4 +314,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-    
+
