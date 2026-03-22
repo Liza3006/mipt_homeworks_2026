@@ -244,7 +244,8 @@ def _build_stats_lines(stats: tuple[float, float, float, dict[str, float]], repo
     lines = [
         f"Your statistics as of {report_date}:",
         f"Total capital: {capital:.2f} rubles",
-        f"This month, the {'loss' if month_income - month_cost < 0 else 'profit'} amounted to {abs(month_income - month_cost):.2f} rubles.",
+        f"This month, the {'loss' if month_income - month_cost < 0 else 'profit'} "
+        f"amounted to {abs(month_income - month_cost):.2f} rubles.",
         f"Income: {month_income:.2f} rubles",
         f"Expenses: {month_cost:.2f} rubles",
         "",
