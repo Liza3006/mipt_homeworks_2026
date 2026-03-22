@@ -84,11 +84,11 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
 
 
 def _create_transaction(trans_type: str, amount: float, date: tuple[int, int, int]) -> dict[str, Any]:
-    entry: dict[str, Any] = {}
-    entry["type"] = trans_type
-    entry["amount"] = amount
-    entry["date"] = date
-    return entry
+    return {
+        "type": trans_type,
+        "amount": amount,
+        "date": date
+    }
 
 
 def income_handler(amount: float, income_date: str) -> str:
@@ -99,7 +99,7 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    financial_transactions_storage.append(_create_transaction("income", amount, date))
+    financial_transactions_storage.append({"type": "income", "amount": amount, "date": date})
     return OP_SUCCESS_MSG
 
 
