@@ -132,21 +132,21 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
+def _is_before_date(transaction_date: tuple[int, int, int], query_date: tuple[int, int, int]) -> bool:
+    if transaction_date[2] != query_date[2]:
+        return transaction_date[2] < query_date[2]
+    if transaction_date[1] != query_date[1]:
+        return transaction_date[1] < query_date[1]
+    return transaction_date[0] <= query_date[0]
+
+
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     capital = 0
-    target_year = query_date[2]
-    target_month = query_date[1]
-    target_day = query_date[0]
 
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        day, month, year = transaction["date"]
-        if year > target_year:
-            continue
-        if year == target_year and month > target_month:
-            continue
-        if year == target_year and month == target_month and day > target_day:
+        if not _is_before_date(transaction["date"], query_date):
             continue
 
         if transaction["type"] == "income":
