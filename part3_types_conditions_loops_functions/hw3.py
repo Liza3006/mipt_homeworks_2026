@@ -28,31 +28,31 @@ def is_leap_year(year: int) -> bool:
 
 
 def _check_date_format(parts: list[str]) -> bool:
-    expected_parts = 3
-    if len(parts) != expected_parts:
+    if len(parts) != 3:
         return False
     return all(part.isdigit() for part in parts)
 
 
 def _check_date_lengths(parts: list[str]) -> bool:
-    day_digits = 2
-    year_digits = 4
-    if len(parts[0]) != day_digits:
+    if len(parts[0]) != 2:
         return False
-    if len(parts[1]) != day_digits:
+    if len(parts[1]) != 2:
         return False
-    return len(parts[2]) == year_digits
+    if len(parts[2]) != 4:
+        return False
+    return True
 
 
 def _check_date_range(day: int, month: int, year: int) -> bool:
-    months_in_year = 12
     if day < 1:
         return False
     if month < 1:
         return False
-    if month > months_in_year:
+    if month > 12:
         return False
-    return not year < 1
+    if year < 1:
+        return False
+    return True
 
 
 def _check_day_in_month(day: int, month: int, year: int) -> bool:
@@ -61,7 +61,9 @@ def _check_day_in_month(day: int, month: int, year: int) -> bool:
     ]
     if is_leap_year(year):
         days_in_month[2] = 29
-    return not day > days_in_month[month]
+    if day > days_in_month[month]:
+        return False
+    return True
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
@@ -83,14 +85,6 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     return (day, month, year)
 
 
-def _create_transaction(trans_type: str, amount: float, date: tuple[int, int, int]) -> dict[str, Any]:
-    entry = {}
-    entry["type"] = trans_type
-    entry["amount"] = amount
-    entry["date"] = date
-    return entry
-
-
 def income_handler(amount: float, income_date: str) -> str:
     if amount <= 0:
         financial_transactions_storage.append({})
@@ -99,23 +93,22 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    transaction = {}
-    transaction["type"] = "income"
-    transaction["amount"] = amount
-    transaction["date"] = date
-    financial_transactions_storage.append(transaction)
+    financial_transactions_storage.append(
+        {"type": "income", "amount": amount, "date": date}
+    )
     return OP_SUCCESS_MSG
 
 
 def _check_category(category_name: str) -> bool:
-    category_parts = 2
     parts = category_name.split("::")
-    if len(parts) != category_parts:
+    if len(parts) != 2:
         return False
     common, target = parts
     if common not in EXPENSE_CATEGORIES:
         return False
-    return target in EXPENSE_CATEGORIES[common]
+    if target not in EXPENSE_CATEGORIES[common]:
+        return False
+    return True
 
 
 def cost_handler(category_name: str, amount: float, income_date: str) -> str:
@@ -129,12 +122,9 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
     if not _check_category(category_name):
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
-    transaction = {}
-    transaction["type"] = "cost"
-    transaction["category"] = category_name
-    transaction["amount"] = amount
-    transaction["date"] = date
-    financial_transactions_storage.append(transaction)
+    financial_transactions_storage.append(
+        {"type": "cost", "category": category_name, "amount": amount, "date": date}
+    )
     return OP_SUCCESS_MSG
 
 
@@ -254,8 +244,7 @@ def stats_handler(report_date: str) -> str:
 
 
 def _handle_income(parts: list[str]) -> None:
-    income_args = 3
-    if len(parts) != income_args:
+    if len(parts) != 3:
         print(UNKNOWN_COMMAND_MSG)
         return
     amount = float(parts[1].replace(",", "."))
@@ -264,12 +253,10 @@ def _handle_income(parts: list[str]) -> None:
 
 
 def _handle_cost(parts: list[str]) -> None:
-    cost_categories_args = 2
-    cost_args = 4
-    if len(parts) == cost_categories_args and parts[1] == "categories":
+    if len(parts) == 2 and parts[1] == "categories":
         print(cost_categories_handler())
         return
-    if len(parts) != cost_args:
+    if len(parts) != 4:
         print(UNKNOWN_COMMAND_MSG)
         return
     amount = float(parts[2].replace(",", "."))
@@ -280,8 +267,7 @@ def _handle_cost(parts: list[str]) -> None:
 
 
 def _handle_stats(parts: list[str]) -> None:
-    stats_args = 2
-    if len(parts) != stats_args:
+    if len(parts) != 2:
         print(UNKNOWN_COMMAND_MSG)
         return
     result = stats_handler(parts[1])
@@ -308,3 +294,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    
