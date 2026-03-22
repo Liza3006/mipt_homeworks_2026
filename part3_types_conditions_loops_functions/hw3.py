@@ -8,13 +8,6 @@ INCORRECT_DATE_MSG = "Invalid date!"
 NOT_EXISTS_CATEGORY = "Category not exists!"
 OP_SUCCESS_MSG = "Added"
 
-TYPE_KEY = "type"
-AMOUNT_KEY = "amount"
-DATE_KEY = "date"
-CATEGORY_KEY = "category"
-INCOME_TYPE = "income"
-COST_TYPE = "cost"
-
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
     "Transport": ("Taxi", "Public transport", "Gas", "Car service"),
@@ -79,13 +72,13 @@ def income_handler(amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
 
-    transaction = {
-        TYPE_KEY: INCOME_TYPE,
-        AMOUNT_KEY: amount,
-        DATE_KEY: date
-    }
-    financial_transactions_storage.append(transaction)
+    entry = {}
+    entry["type"] = "income"
+    entry["amount"] = amount
+    entry["date"] = date
+    financial_transactions_storage.append(entry)
     return OP_SUCCESS_MSG
+
 
 
 def cost_handler(category_name: str, amount: float, income_date: str) -> str:
@@ -110,13 +103,12 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
 
-    transaction = {
-        TYPE_KEY: COST_TYPE,
-        CATEGORY_KEY: category_name,
-        AMOUNT_KEY: amount,
-        DATE_KEY: date
-    }
-    financial_transactions_storage.append(transaction)
+    entry = {}
+    entry["type"] = "cost"
+    entry["category"] = category_name
+    entry["amount"] = amount
+    entry["date"] = date
+    financial_transactions_storage.append(entry)
     return OP_SUCCESS_MSG
 
 
