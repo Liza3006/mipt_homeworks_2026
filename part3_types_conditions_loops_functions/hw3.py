@@ -41,9 +41,7 @@ def _check_parts_digits(parts: list[str]) -> bool:
         return False
     if len(parts[1]) != day_digits:
         return False
-    if len(parts[2]) != year_digits:
-        return False
-    return True
+    return len(parts[2]) == year_digits
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
