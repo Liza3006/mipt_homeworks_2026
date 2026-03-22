@@ -1,4 +1,3 @@
-```python
 #!/usr/bin/env python
 
 from typing import Any
@@ -299,4 +298,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-```
