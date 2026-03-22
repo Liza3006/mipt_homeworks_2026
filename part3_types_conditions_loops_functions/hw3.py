@@ -46,17 +46,19 @@ def _check_parts_digits(parts: list[str]) -> bool:
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
-    if not _check_parts_length(parts):
+    if len(parts) != 3:
         return None
-    if not _check_parts_digits(parts):
+    if not all(part.isdigit() for part in parts):
+        return None
+
+    if len(parts[0]) != 2 or len(parts[1]) != 2 or len(parts[2]) != 4:
         return None
 
     day = int(parts[0])
     month = int(parts[1])
     year = int(parts[2])
 
-    months_in_year = 12
-    if day < 1 or month < 1 or month > months_in_year or year < 1:
+    if day < 1 or month < 1 or month > 12 or year < 1:
         return None
 
     days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
