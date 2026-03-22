@@ -99,7 +99,11 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    financial_transactions_storage.append({"type": "income", "amount": amount, "date": date})
+    transaction = {}
+    transaction["type"] = "income"
+    transaction["amount"] = amount
+    transaction["date"] = date
+    financial_transactions_storage.append(transaction)
     return OP_SUCCESS_MSG
 
 
