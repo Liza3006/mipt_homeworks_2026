@@ -52,9 +52,7 @@ def _check_date_range(day: int, month: int, year: int) -> bool:
         return False
     if month > months_in_year:
         return False
-    if year < 1:
-        return False
-    return True
+    return not year < 1
 
 
 def _check_day_in_month(day: int, month: int, year: int) -> bool:
