@@ -45,9 +45,10 @@ def _check_parts_digits(parts: list[str]) -> bool:
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
-    if not _check_parts_length(maybe_dt.split("-")):
+    parts = maybe_dt.split("-")
+    if not _check_parts_length(parts):
         return None
-    if not _check_parts_digits(maybe_dt.split("-")):
+    if not _check_parts_digits(parts):
         return None
 
     day = int(parts[0])
