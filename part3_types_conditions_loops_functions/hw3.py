@@ -1,3 +1,4 @@
+```python
 #!/usr/bin/env python
 
 from typing import Any
@@ -28,11 +29,10 @@ def is_leap_year(year: int) -> bool:
 
 
 def _check_date_format(parts: list[str]) -> bool:
-    if len(parts) != 3:
+    expected_parts = 3
+    if len(parts) != expected_parts:
         return False
-    if not all(part.isdigit() for part in parts):
-        return False
-    return True
+    return all(part.isdigit() for part in parts)
 
 
 def _check_date_lengths(parts: list[str]) -> bool:
@@ -42,16 +42,12 @@ def _check_date_lengths(parts: list[str]) -> bool:
         return False
     if len(parts[1]) != day_digits:
         return False
-    if len(parts[2]) != year_digits:
-        return False
-    return True
+    return len(parts[2]) == year_digits
 
 
 def _check_date_range(day: int, month: int, year: int) -> bool:
     months_in_year = 12
-    if day < 1 or month < 1 or month > months_in_year or year < 1:
-        return False
-    return True
+    return not (day < 1 or month < 1 or month > months_in_year or year < 1)
 
 
 def _check_day_in_month(day: int, month: int, year: int) -> bool:
@@ -60,9 +56,7 @@ def _check_day_in_month(day: int, month: int, year: int) -> bool:
     ]
     if is_leap_year(year):
         days_in_month[2] = 29
-    if day > days_in_month[month]:
-        return False
-    return True
+    return not day > days_in_month[month]
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
@@ -105,15 +99,14 @@ def income_handler(amount: float, income_date: str) -> str:
 
 
 def _check_category(category_name: str) -> bool:
+    category_parts = 2
     parts = category_name.split("::")
-    if len(parts) != 2:
+    if len(parts) != category_parts:
         return False
     common, target = parts
     if common not in EXPENSE_CATEGORIES:
         return False
-    if target not in EXPENSE_CATEGORIES[common]:
-        return False
-    return True
+    return target in EXPENSE_CATEGORIES[common]
 
 
 def cost_handler(category_name: str, amount: float, income_date: str) -> str:
@@ -306,3 +299,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+```
