@@ -10,11 +10,29 @@ INCORRECT_DATE_MSG = "Invalid date!"
 NOT_EXISTS_CATEGORY = "Category not exists!"
 OP_SUCCESS_MSG = "Added"
 
+# Date constants
+DATE_PARTS_COUNT = 3
+DAY_DIGITS = 2
+MONTH_DIGITS = 2
+YEAR_DIGITS = 4
+MONTHS_IN_YEAR = 12
+
+# Category constants
+CATEGORY_PARTS_COUNT = 2
+
+# Command argument counts
+INCOME_ARGS = 3
+COST_ARGS = 4
+COST_CATEGORIES_ARGS = 2
+STATS_ARGS = 2
+
+# Transaction keys
 KEY_TYPE = "type"
 KEY_AMOUNT = "amount"
 KEY_DATE = "date"
 KEY_CATEGORY = "category"
 
+# Transaction types
 TYPE_INCOME = "income"
 TYPE_COST = "cost"
 
@@ -38,17 +56,17 @@ def is_leap_year(year: int) -> bool:
 
 
 def _check_date_format(parts: list[str]) -> bool:
-    if len(parts) != 3:
+    if len(parts) != DATE_PARTS_COUNT:
         return False
     return all(part.isdigit() for part in parts)
 
 
 def _check_date_lengths(parts: list[str]) -> bool:
-    if len(parts[0]) != 2:
+    if len(parts[0]) != DAY_DIGITS:
         return False
-    if len(parts[1]) != 2:
+    if len(parts[1]) != MONTH_DIGITS:
         return False
-    return len(parts[2]) == 4
+    return len(parts[2]) == YEAR_DIGITS
 
 
 def _check_date_range(day: int, month: int, year: int) -> bool:
@@ -56,7 +74,7 @@ def _check_date_range(day: int, month: int, year: int) -> bool:
         return False
     if month < 1:
         return False
-    if month > 12:
+    if month > MONTHS_IN_YEAR:
         return False
     return year >= 1
 
@@ -113,7 +131,7 @@ def income_handler(amount: float, income_date: str) -> str:
 
 def _check_category(category_name: str) -> bool:
     parts = category_name.split("::")
-    if len(parts) != 2:
+    if len(parts) != CATEGORY_PARTS_COUNT:
         return False
     common, target = parts
     if common not in EXPENSE_CATEGORIES:
@@ -258,7 +276,7 @@ def stats_handler(report_date: str) -> str:
 
 
 def _handle_income(parts: list[str]) -> None:
-    if len(parts) != 3:
+    if len(parts) != INCOME_ARGS:
         print(UNKNOWN_COMMAND_MSG)
         return
     amount = float(parts[1].replace(",", "."))
@@ -266,10 +284,10 @@ def _handle_income(parts: list[str]) -> None:
 
 
 def _handle_cost(parts: list[str]) -> None:
-    if len(parts) == 2 and parts[1] == "categories":
+    if len(parts) == COST_CATEGORIES_ARGS and parts[1] == "categories":
         print(cost_categories_handler())
         return
-    if len(parts) != 4:
+    if len(parts) != COST_ARGS:
         print(UNKNOWN_COMMAND_MSG)
         return
     amount = float(parts[2].replace(",", "."))
@@ -280,7 +298,7 @@ def _handle_cost(parts: list[str]) -> None:
 
 
 def _handle_stats(parts: list[str]) -> None:
-    if len(parts) != 2:
+    if len(parts) != STATS_ARGS:
         print(UNKNOWN_COMMAND_MSG)
         return
     print(stats_handler(parts[1]))
