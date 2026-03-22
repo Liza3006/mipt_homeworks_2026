@@ -27,39 +27,45 @@ def is_leap_year(year: int) -> bool:
     return not (year % 100 == 0 and year % 400 != 0)
 
 
+def _check_parts_length(parts: list[str]) -> bool:
+    if len(parts) != 3:
+        return False
+    if not all(part.isdigit() for part in parts):
+        return False
+    return True
+
+
+def _check_parts_digits(parts: list[str]) -> bool:
+    if len(parts[0]) != 2:
+        return False
+    if len(parts[1]) != 2:
+        return False
+    if len(parts[2]) != 4:
+        return False
+    return True
+
+
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
-    date_parts_count = 3
-    day_digits = 2
-    year_digits = 4
-    months_in_year = 12
-    feb_index = 2
-    feb_leap_days = 29
-
     parts = maybe_dt.split("-")
-    if (len(parts) != date_parts_count) or (not all(part.isdigit() for part in parts)):
+    if not _check_parts_length(parts):
         return None
-
+    if not _check_parts_digits(parts):
+        return None
+    
     day = int(parts[0])
     month = int(parts[1])
     year = int(parts[2])
-
-    if (len(parts[0]) != day_digits or
-            len(parts[1]) != day_digits or
-            len(parts[2]) != year_digits):
+    
+    if day < 1 or month < 1 or month > 12 or year < 1:
         return None
-
-    if day < 1 or month < 1 or month > months_in_year or year < 1:
-        return None
-
-    days_in_month = [
-        0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-    ]
+    
+    days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     if is_leap_year(year):
-        days_in_month[feb_index] = feb_leap_days
-
+        days_in_month[2] = 29
+    
     if day > days_in_month[month]:
         return None
-
+    
     return (day, month, year)
 
 
