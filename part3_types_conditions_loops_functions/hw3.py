@@ -86,7 +86,6 @@ def income_handler(amount: float, income_date: str) -> str:
     return OP_SUCCESS_MSG
 
 
-
 def cost_handler(category_name: str, amount: float, income_date: str) -> str:
     if amount <= 0:
         financial_transactions_storage.append({})
@@ -102,10 +101,7 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
     common, target = parts
-    if common not in EXPENSE_CATEGORIES:
-        financial_transactions_storage.append({})
-        return NOT_EXISTS_CATEGORY
-    if target not in EXPENSE_CATEGORIES[common]:
+    if (common not in EXPENSE_CATEGORIES) or (target not in EXPENSE_CATEGORIES[common]):
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
 
