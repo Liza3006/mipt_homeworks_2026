@@ -221,10 +221,7 @@ def _format_category_line(idx: int, category: str, value: float) -> str:
 def _build_stats_lines(capital: float, month_income: float, month_cost: float,
                        costs: dict[str, float], report_date: str) -> list[str]:
     budget = month_income - month_cost
-    if budget < 0:
-        direction = "loss"
-    else:
-        direction = "profit"
+    direction = "loss" if budget < 0 else "profit"
     lines = [
         f"Your statistics as of {report_date}:",
         f"Total capital: {capital:.2f} rubles",
