@@ -46,7 +46,15 @@ def _check_date_lengths(parts: list[str]) -> bool:
 
 def _check_date_range(day: int, month: int, year: int) -> bool:
     months_in_year = 12
-    return not (day < 1 or month < 1 or month > months_in_year or year < 1)
+    if day < 1:
+        return False
+    if month < 1:
+        return False
+    if month > months_in_year:
+        return False
+    if year < 1:
+        return False
+    return True
 
 
 def _check_day_in_month(day: int, month: int, year: int) -> bool:
