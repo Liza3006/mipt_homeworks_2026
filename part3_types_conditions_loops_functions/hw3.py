@@ -131,16 +131,6 @@ def cost_categories_handler() -> str:
         lines.extend(f"{common}::{target}" for target in targets)
     return "\n".join(lines)
 
-    for transaction in financial_transactions_storage:
-        if not transaction:
-            continue
-        _, month, year = transaction["date"]
-        if transaction["type"] != "income":
-            continue
-        if year == target_year and month == target_month:
-            month_income += transaction["amount"]
-    return month_income
-
 
 def _is_before_date(transaction_date: tuple[int, int, int], query_date: tuple[int, int, int]) -> bool:
     if transaction_date[2] != query_date[2]:
@@ -164,10 +154,6 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
         else:
             capital -= transaction["amount"]
     return capital
-
-
-def _is_same_month(year: int, month: int, query_date: tuple[int, int, int]) -> bool:
-    return year == query_date[2] and month == query_date[1]
 
 
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
