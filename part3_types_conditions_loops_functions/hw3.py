@@ -84,11 +84,11 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
 
 
 def _create_transaction(trans_type: str, amount: float, date: tuple[int, int, int]) -> dict[str, Any]:
-    return {
-        "type": trans_type,
-        "amount": amount,
-        "date": date
-    }
+    entry = {}
+    entry["type"] = trans_type
+    entry["amount"] = amount
+    entry["date"] = date
+    return entry
 
 
 def income_handler(amount: float, income_date: str) -> str:
@@ -129,12 +129,12 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
     if not _check_category(category_name):
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
-    entry: dict[str, Any] = {}
-    entry["type"] = "cost"
-    entry["category"] = category_name
-    entry["amount"] = amount
-    entry["date"] = date
-    financial_transactions_storage.append(entry)
+    transaction = {}
+    transaction["type"] = "cost"
+    transaction["category"] = category_name
+    transaction["amount"] = amount
+    transaction["date"] = date
+    financial_transactions_storage.append(transaction)
     return OP_SUCCESS_MSG
 
 
