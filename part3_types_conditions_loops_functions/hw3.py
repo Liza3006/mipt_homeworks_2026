@@ -140,13 +140,15 @@ def cost_categories_handler() -> str:
 
 
 def _compare_dates(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
-    return t_date[2] < q_date[2] or (
-        t_date[2] == q_date[2] and (
-            t_date[1] < q_date[1] or (
-                t_date[1] == q_date[1] and t_date[0] <= q_date[0]
-            )
-        )
-    )
+    if t_date[2] < q_date[2]:
+        return True
+    if t_date[2] > q_date[2]:
+        return False
+    if t_date[1] < q_date[1]:
+        return True
+    if t_date[1] > q_date[1]:
+        return False
+    return t_date[0] <= q_date[0]
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
@@ -157,15 +159,17 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
         if not _compare_dates(transaction["date"], query_date):
             continue
         if transaction["type"] == "income":
-            capital += transaction["amount"]
+            capital = capital + transaction["amount"]
         else:
-            capital -= transaction["amount"]
+            capital = capital - transaction["amount"]
     return capital
 
 
 def _is_month_match(transaction: dict[str, Any], target_year: int, target_month: int) -> bool:
     _, month, year = transaction["date"]
-    return year == target_year and month == target_month
+    if year != target_year:
+        return False
+    return month == target_month
 
 
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
@@ -178,7 +182,7 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
         if transaction["type"] != "income":
             continue
         if _is_month_match(transaction, target_year, target_month):
-            month_income += transaction["amount"]
+            month_income = month_income + transaction["amount"]
     return month_income
 
 
@@ -190,9 +194,10 @@ def _process_cost(transaction: dict[str, Any], target_year: int, target_month: i
         return month_cost, costs
     amount = transaction["amount"]
     category = transaction["category"]
-    month_cost += amount
-    costs[category] = costs.get(category, 0) + amount
-    return month_cost, costs
+    new_cost = month_cost + amount
+    new_costs = costs.copy()
+    new_costs[category] = new_costs.get(category, 0) + amount
+    return new_cost, new_costs
 
 
 def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
@@ -216,7 +221,10 @@ def _format_category_line(idx: int, category: str, value: float) -> str:
 def _build_stats_lines(capital: float, month_income: float, month_cost: float,
                        costs: dict[str, float], report_date: str) -> list[str]:
     budget = month_income - month_cost
-    direction = "loss" if budget < 0 else "profit"
+    if budget < 0:
+        direction = "loss"
+    else:
+        direction = "profit"
     lines = [
         f"Your statistics as of {report_date}:",
         f"Total capital: {capital:.2f} rubles",
@@ -238,8 +246,8 @@ def stats_handler(report_date: str) -> str:
     capital = _calculate_capital(query_date)
     month_income = _calculate_month_income(query_date)
     month_cost, costs = _calculate_month_cost(query_date)
-    lines = _build_stats_lines(capital, month_income, month_cost, costs, report_date)
-    return "\n".join(lines)
+    result = _build_stats_lines(capital, month_income, month_cost, costs, report_date)
+    return "\n".join(result)
 
 
 def _handle_income(parts: list[str]) -> None:
