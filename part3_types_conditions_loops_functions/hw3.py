@@ -91,7 +91,7 @@ def income_handler(amount: float, income_date: str) -> str:
     if date is None:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
-    entry = {}
+    entry: dict[str, Any] = {}
     entry["type"] = "income"
     entry["amount"] = amount
     entry["date"] = date
@@ -121,7 +121,7 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
     if not _check_category(category_name):
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
-    entry = {}
+    entry: dict[str, Any] = {}
     entry["type"] = "cost"
     entry["category"] = category_name
     entry["amount"] = amount
@@ -166,10 +166,10 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
 def _get_month_income(transaction: dict[str, Any], target_year: int, target_month: int) -> float:
     _, month, year = transaction["date"]
     if transaction["type"] != "income":
-        return 0
+        return 0.0
     if year == target_year and month == target_month:
-        return transaction["amount"]
-    return 0
+        return float(transaction["amount"])
+    return 0.0
 
 
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
@@ -187,16 +187,16 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
 def _get_month_cost(transaction: dict[str, Any], target_year: int, target_month: int) -> tuple[float, str]:
     _, month, year = transaction["date"]
     if transaction["type"] != "cost":
-        return (0, "")
+        return (0.0, "")
     if year == target_year and month == target_month:
-        return (transaction["amount"], transaction["category"])
-    return (0, "")
+        return (float(transaction["amount"]), transaction["category"])
+    return (0.0, "")
 
 
 def _get_month_transactions(query_date: tuple[int, int, int]) -> list[dict[str, Any]]:
     target_year = query_date[2]
     target_month = query_date[1]
-    month_transactions = []
+    month_transactions: list[dict[str, Any]] = []
 
     for transaction in financial_transactions_storage:
         if not transaction:
