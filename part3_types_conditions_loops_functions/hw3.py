@@ -162,31 +162,31 @@ def _get_month_transactions(query_date: tuple[int, int, int]) -> list[dict[str, 
     target_year = query_date[2]
     target_month = query_date[1]
     month_transactions = []
-    
+
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        
+
         _, month, year = transaction["date"]
         if transaction["type"] != "cost":
             continue
-        
+
         if year == target_year and month == target_month:
             month_transactions.append(transaction)
-    
+
     return month_transactions
 
 
 def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
     month_cost = 0
     costs: dict[str, float] = {}
-    
+
     for transaction in _get_month_transactions(query_date):
         amount = transaction["amount"]
         month_cost += amount
         category = transaction["category"]
         costs[category] = costs.get(category, 0) + amount
-    
+
     return month_cost, costs
 
 
