@@ -175,11 +175,11 @@ def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict
     return month_cost, costs
 
 
-def _build_stats_lines(capital: float, month_income: float, month_cost: float, 
+def _build_stats_lines(capital: float, month_income: float, month_cost: float,
                        costs: dict[str, float], report_date: str) -> list[str]:
     budget = month_income - month_cost
     direction = "loss" if budget < 0 else "profit"
-    
+
     lines = [
         f"Your statistics as of {report_date}:",
         f"Total capital: {capital:.2f} rubles",
@@ -189,13 +189,13 @@ def _build_stats_lines(capital: float, month_income: float, month_cost: float,
         "",
         "Details (category: amount):",
     ]
-    
+
     for idx, (category, value) in enumerate(sorted(costs.items()), 1):
         if value == int(value):
             lines.append(f"{idx}. {category}: {int(value)}")
         else:
             lines.append(f"{idx}. {category}: {value}")
-    
+
     return lines
 
 
@@ -204,13 +204,15 @@ def stats_handler(report_date: str) -> str:
     if query_date is None:
         return INCORRECT_DATE_MSG
 
-    capital = _calculate_capital(query_date)
-    month_income = _calculate_month_income(query_date)
-    month_cost, costs = _calculate_month_cost(query_date)
+    stats = (
+        _calculate_capital(query_date),
+        _calculate_month_income(query_date),
+        *_calculate_month_cost(query_date)
+    )
 
-    lines = _build_stats_lines(capital, month_income, month_cost, costs, report_date)
+    lines = _build_stats_lines(*stats, report_date)
     return "\n".join(lines)
-
+    
 
 def _handle_income(parts: list[str]) -> None:
     income_args = 3
