@@ -139,25 +139,23 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
-def _is_before_date(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
-    t_year, t_month, t_day = t_date
-    q_year, q_month, q_day = q_date
-    if t_year != q_year:
-        return t_year < q_year
-    if t_month != q_month:
-        return t_month < q_month
-    return t_day <= q_day
+def _compare_dates(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
+    return t_date[2] < q_date[2] or (
+        t_date[2] == q_date[2] and (
+            t_date[1] < q_date[1] or (
+                t_date[1] == q_date[1] and t_date[0] <= q_date[0]
+            )
+        )
+    )
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     capital = 0
-
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        if not _is_before_date(transaction["date"], query_date):
+        if not _compare_dates(transaction["date"], query_date):
             continue
-
         if transaction["type"] == "income":
             capital += transaction["amount"]
         else:
@@ -165,20 +163,36 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     return capital
 
 
+def _is_month_match(transaction: dict[str, Any], target_year: int, target_month: int) -> bool:
+    _, month, year = transaction["date"]
+    return year == target_year and month == target_month
+
+
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
     target_year = query_date[2]
     target_month = query_date[1]
     month_income = 0
-
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        _, month, year = transaction["date"]
         if transaction["type"] != "income":
             continue
-        if year == target_year and month == target_month:
+        if _is_month_match(transaction, target_year, target_month):
             month_income += transaction["amount"]
     return month_income
+
+
+def _process_cost(transaction: dict[str, Any], target_year: int, target_month: int,
+                  month_cost: float, costs: dict[str, float]) -> tuple[float, dict[str, float]]:
+    if not _is_month_match(transaction, target_year, target_month):
+        return month_cost, costs
+    if transaction["type"] != "cost":
+        return month_cost, costs
+    amount = transaction["amount"]
+    category = transaction["category"]
+    month_cost += amount
+    costs[category] = costs.get(category, 0) + amount
+    return month_cost, costs
 
 
 def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
@@ -186,20 +200,17 @@ def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict
     target_month = query_date[1]
     month_cost = 0
     costs: dict[str, float] = {}
-
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        _, month, year = transaction["date"]
-        if transaction["type"] != "cost":
-            continue
-        if year == target_year and month == target_month:
-            amount = transaction["amount"]
-            month_cost += amount
-            category = transaction["category"]
-            costs[category] = costs.get(category, 0) + amount
-
+        month_cost, costs = _process_cost(transaction, target_year, target_month, month_cost, costs)
     return month_cost, costs
+
+
+def _format_category_line(idx: int, category: str, value: float) -> str:
+    if value == int(value):
+        return f"{idx}. {category}: {int(value)}"
+    return f"{idx}. {category}: {value}"
 
 
 def _build_stats_lines(capital: float, month_income: float, month_cost: float,
@@ -215,13 +226,8 @@ def _build_stats_lines(capital: float, month_income: float, month_cost: float,
         "",
         "Details (category: amount):",
     ]
-
     for idx, (category, value) in enumerate(sorted(costs.items()), 1):
-        if value == int(value):
-            lines.append(f"{idx}. {category}: {int(value)}")
-        else:
-            lines.append(f"{idx}. {category}: {value}")
-
+        lines.append(_format_category_line(idx, category, value))
     return lines
 
 
@@ -229,11 +235,9 @@ def stats_handler(report_date: str) -> str:
     query_date = extract_date(report_date)
     if query_date is None:
         return INCORRECT_DATE_MSG
-
     capital = _calculate_capital(query_date)
     month_income = _calculate_month_income(query_date)
     month_cost, costs = _calculate_month_cost(query_date)
-
     lines = _build_stats_lines(capital, month_income, month_cost, costs, report_date)
     return "\n".join(lines)
 
