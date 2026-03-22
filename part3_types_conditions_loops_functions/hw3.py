@@ -85,7 +85,6 @@ def income_handler(amount: float, income_date: str) -> str:
         DATE_KEY: date
     }
     financial_transactions_storage.append(transaction)
-    
     return OP_SUCCESS_MSG
 
 
@@ -118,7 +117,6 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         DATE_KEY: date
     }
     financial_transactions_storage.append(transaction)
-    
     return OP_SUCCESS_MSG
 
 
