@@ -38,14 +38,18 @@ def _check_parts_digits(parts: list[str]) -> bool:
         return False
     if len(parts[1]) != 2:
         return False
-    return len(parts[2]) == 4
+    if len(parts[2]) != 4:
+        return False
+    return True
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
-    if not _check_parts_length(parts):
+    if len(parts) != 3:
         return None
-    if not _check_parts_digits(parts):
+    if not all(part.isdigit() for part in parts):
+        return None
+    if len(parts[0]) != 2 or len(parts[1]) != 2 or len(parts[2]) != 4:
         return None
 
     day = int(parts[0])
