@@ -72,7 +72,7 @@ def income_handler(amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return INCORRECT_DATE_MSG
 
-    entry = {}
+    entry: dict[str, Any] = {}
     entry["type"] = "income"
     entry["amount"] = amount
     entry["date"] = date
@@ -103,7 +103,7 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
 
-    entry = {}
+    entry: dict[str, Any] = {}
     entry["type"] = "cost"
     entry["category"] = category_name
     entry["amount"] = amount
