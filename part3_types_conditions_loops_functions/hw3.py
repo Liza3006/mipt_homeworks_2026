@@ -212,11 +212,10 @@ def stats_handler(report_date: str) -> str:
 
     lines = _build_stats_lines(*stats, report_date)
     return "\n".join(lines)
-    
+
 
 def _handle_income(parts: list[str]) -> None:
-    income_args = 3
-    if len(parts) != income_args:
+    if len(parts) != 3:
         print(UNKNOWN_COMMAND_MSG)
         return
     amount = float(parts[1].replace(",", "."))
