@@ -28,35 +28,37 @@ def is_leap_year(year: int) -> bool:
 
 
 def _check_parts_length(parts: list[str]) -> bool:
-    if len(parts) != 3:
+    expected_parts = 3
+    if len(parts) != expected_parts:
         return False
     return all(part.isdigit() for part in parts)
 
 
 def _check_parts_digits(parts: list[str]) -> bool:
-    if len(parts[0]) != 2:
+    day_digits = 2
+    year_digits = 4
+    if len(parts[0]) != day_digits:
         return False
-    if len(parts[1]) != 2:
+    if len(parts[1]) != day_digits:
         return False
-    if len(parts[2]) != 4:
+    if len(parts[2]) != year_digits:
         return False
     return True
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
-    if len(parts) != 3:
+    if not _check_parts_length(parts):
         return None
-    if not all(part.isdigit() for part in parts):
-        return None
-    if len(parts[0]) != 2 or len(parts[1]) != 2 or len(parts[2]) != 4:
+    if not _check_parts_digits(parts):
         return None
 
     day = int(parts[0])
     month = int(parts[1])
     year = int(parts[2])
 
-    if day < 1 or month < 1 or month > 12 or year < 1:
+    months_in_year = 12
+    if day < 1 or month < 1 or month > months_in_year or year < 1:
         return None
 
     days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
