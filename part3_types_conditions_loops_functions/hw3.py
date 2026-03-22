@@ -61,7 +61,8 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     month = int(parts[1])
     year = int(parts[2])
 
-    if day < 1 or month < 1 or month > 12 or year < 1:
+    months_in_year = 12
+    if day < 1 or month < 1 or month > months_in_year or year < 1:
         return None
 
     days_in_month = [
