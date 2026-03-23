@@ -33,7 +33,9 @@ KEY_CATEGORY = "category"
 TYPE_INCOME = "income"
 TYPE_COST = "cost"
 
-DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+DAYS_IN_MONTH = [
+    0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+]
 
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
