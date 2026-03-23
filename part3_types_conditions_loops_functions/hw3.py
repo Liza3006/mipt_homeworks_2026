@@ -42,6 +42,7 @@ def is_leap_year(year: int) -> bool:
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
+
     if (len(parts) != CONST3) or not all(part.isdigit() for part in parts):
         return None
 
@@ -115,15 +116,19 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
+def _is_date_after(date1: tuple[int, int, int], date2: tuple[int, int, int]) -> bool:
+    return (date1[2], date1[1], date1[0]) > (date2[2], date2[1], date2[0])
+
+
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     capital = 0
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
         day, month, year = transaction[DATE]
-        if (year, month, day) > (query_date[2], query_date[1], query_date[0]):
+        if _is_date_after((day, month, year), query_date):
             continue
-        if transaction[TYPE] == "income":
+        if transaction[TYPE] == INCOME:
             capital += transaction[AMOUNT]
         else:
             capital -= transaction[AMOUNT]
@@ -136,11 +141,15 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
         if not transaction:
             continue
         _, month, year = transaction[DATE]
-        if transaction[TYPE] != "income":
+        if transaction[TYPE] != INCOME:
             continue
         if year == query_date[2] and month == query_date[1]:
             month_income += transaction[AMOUNT]
     return month_income
+
+
+def _is_same_month(date: tuple[int, int, int], query: tuple[int, int, int]) -> bool:
+    return date[1] == query[1] and date[2] == query[2]
 
 
 def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
@@ -151,12 +160,10 @@ def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict
             continue
         if transaction["type"] != "cost":
             continue
-        if (transaction[DATE][2] == query_date[2]
-                and transaction[DATE][1] == query_date[1]):
+        if _is_same_month(transaction[DATE], query_date):
             month_cost += transaction[AMOUNT]
             category = transaction["category"]
-            costs[category] = (costs.get(category, 0)
-                               + transaction[AMOUNT])
+            costs[category] = (costs.get(category, 0) + transaction[AMOUNT])
     return month_cost, costs
 
 
@@ -230,7 +237,7 @@ def _handle_stats(parts: list[str]) -> None:
 
 def main() -> None:
     handlers = {
-        "income": _handle_income,
+        INCOME: _handle_income,
         "cost": _handle_cost,
         "stats": _handle_stats,
     }
