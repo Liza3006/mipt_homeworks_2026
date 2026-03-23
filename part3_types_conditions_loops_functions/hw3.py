@@ -10,31 +10,26 @@ INCORRECT_DATE_MSG = "Invalid date!"
 NOT_EXISTS_CATEGORY = "Category not exists!"
 OP_SUCCESS_MSG = "Added"
 
-# Date constants
 DATE_PARTS_COUNT = 3
 DAY_DIGITS = 2
 MONTH_DIGITS = 2
 YEAR_DIGITS = 4
 MONTHS_IN_YEAR = 12
-
-# Category constants
 CATEGORY_PARTS_COUNT = 2
-
-# Command argument counts
 INCOME_ARGS = 3
 COST_ARGS = 4
 COST_CATEGORIES_ARGS = 2
 STATS_ARGS = 2
 
-# Transaction keys
 KEY_TYPE = "type"
 KEY_AMOUNT = "amount"
 KEY_DATE = "date"
 KEY_CATEGORY = "category"
 
-# Transaction types
 TYPE_INCOME = "income"
 TYPE_COST = "cost"
+
+DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
@@ -79,11 +74,11 @@ def _check_date_range(day: int, month: int, year: int) -> bool:
     return year >= 1
 
 
-def _check_day_in_month(day: int, month: int, year: int) -> bool:
-    days = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    if is_leap_year(year):
-        days[2] = 29
-    return day <= days[month]
+def _get_days_in_month(month: int, year: int) -> int:
+    days = DAYS_IN_MONTH[month]
+    if month == 2 and is_leap_year(year):
+        return 29
+    return days
 
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
@@ -93,11 +88,13 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     if not _check_date_lengths(parts):
         return None
 
-    day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
+    day = int(parts[0])
+    month = int(parts[1])
+    year = int(parts[2])
 
     if not _check_date_range(day, month, year):
         return None
-    if not _check_day_in_month(day, month, year):
+    if day > _get_days_in_month(month, year):
         return None
 
     return (day, month, year)
@@ -164,17 +161,15 @@ def cost_categories_handler() -> str:
 
 
 def _compare_dates(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
-    t_year, t_month, t_day = t_date[2], t_date[1], t_date[0]
-    q_year, q_month, q_day = q_date[2], q_date[1], q_date[0]
-    if t_year != q_year:
-        return t_year < q_year
-    if t_month != q_month:
-        return t_month < q_month
-    return t_day <= q_day
+    if t_date[2] != q_date[2]:
+        return t_date[2] < q_date[2]
+    if t_date[1] != q_date[1]:
+        return t_date[1] < q_date[1]
+    return t_date[0] <= q_date[0]
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
-    capital = 0.0
+    capital = 0
     for trans in financial_transactions_storage:
         if not trans:
             continue
@@ -191,8 +186,9 @@ def _is_month_match(transaction: dict[str, Any], target_year: int, target_month:
 
 
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
-    target_year, target_month = query_date[2], query_date[1]
-    month_income = 0.0
+    target_year = query_date[2]
+    target_month = query_date[1]
+    month_income = 0
     for trans in financial_transactions_storage:
         if not trans:
             continue
@@ -204,8 +200,13 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
 
 
 def _calculate_month_cost(query_date: tuple[int, int, int]) -> MonthCostResult:
-    target_year, target_month = query_date[2], query_date[1]
-    month_cost = 0.0
+    target_year = query_date[2]
+    target_month = query_date[1]
+    return _process_costs(target_year, target_month)
+
+
+def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
+    month_cost = 0
     costs: dict[str, float] = {}
     for trans in financial_transactions_storage:
         if not trans:
@@ -268,6 +269,10 @@ def stats_handler(report_date: str) -> str:
     query_date = extract_date(report_date)
     if query_date is None:
         return INCORRECT_DATE_MSG
+    return _format_stats_result(query_date, report_date)
+
+
+def _format_stats_result(query_date: tuple[int, int, int], report_date: str) -> str:
     capital = _calculate_capital(query_date)
     month_income = _calculate_month_income(query_date)
     month_cost, costs = _calculate_month_cost(query_date)
