@@ -33,9 +33,7 @@ KEY_CATEGORY = "category"
 TYPE_INCOME = "income"
 TYPE_COST = "cost"
 
-DAYS_IN_MONTH = [
-    0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-]
+DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
@@ -218,27 +216,23 @@ def _update_costs(costs: dict[str, float], category: str, amount: float) -> None
     costs[category] = costs.get(category, 0) + amount
 
 
-def _process_single_cost(trans: dict[str, Any], target_year: int,
-                         target_month: int, month_cost: int,
-                         costs: dict[str, float]) -> tuple[int, dict[str, float]]:
+def _is_valid_cost_transaction(trans: dict[str, Any], target_year: int,
+                               target_month: int) -> bool:
     if not trans:
-        return month_cost, costs
+        return False
     if trans[KEY_TYPE] != TYPE_COST:
-        return month_cost, costs
-    if not _is_month_match(trans, target_year, target_month):
-        return month_cost, costs
-    month_cost += trans[KEY_AMOUNT]
-    _update_costs(costs, trans[KEY_CATEGORY], trans[KEY_AMOUNT])
-    return month_cost, costs
+        return False
+    return _is_month_match(trans, target_year, target_month)
 
 
 def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
     month_cost = 0
     costs: dict[str, float] = {}
     for trans in financial_transactions_storage:
-        month_cost, costs = _process_single_cost(
-            trans, target_year, target_month, month_cost, costs
-        )
+        if not _is_valid_cost_transaction(trans, target_year, target_month):
+            continue
+        month_cost += trans[KEY_AMOUNT]
+        _update_costs(costs, trans[KEY_CATEGORY], trans[KEY_AMOUNT])
     return month_cost, costs
 
 
