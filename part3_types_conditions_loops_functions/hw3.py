@@ -54,6 +54,9 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
             len(parts[2]) != CONST4):
         flag = 1
 
+    if flag:
+        return None
+
     if int(parts[0]) < 1 or int(parts[1]) < 1:
         flag = 1
     if int(parts[1]) > CONST12 or int(parts[2]) < 1:
