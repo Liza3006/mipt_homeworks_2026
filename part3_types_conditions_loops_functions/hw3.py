@@ -3,6 +3,7 @@
 from typing import Any
 
 MonthCostResult = tuple[float, dict[str, float]]
+DateTuple = tuple[int, int, int]
 
 UNKNOWN_COMMAND_MSG = "Unknown command!"
 NONPOSITIVE_VALUE_MSG = "Value must be grater than zero!"
@@ -165,8 +166,15 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
-def _compare_dates(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
-    return (t_date[2], t_date[1], t_date[0]) <= (q_date[2], q_date[1], q_date[0])
+def _compare_dates(t_date: DateTuple, q_date: DateTuple) -> bool:
+    t_key = _date_to_key(t_date)
+    q_key = _date_to_key(q_date)
+    return t_key <= q_key
+
+
+def _date_to_key(date: DateTuple) -> tuple[int, int, int]:
+    day, month, year = date
+    return (year, month, day)
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
@@ -210,18 +218,27 @@ def _update_costs(costs: dict[str, float], category: str, amount: float) -> None
     costs[category] = costs.get(category, 0) + amount
 
 
+def _process_single_cost(trans: dict[str, Any], target_year: int,
+                         target_month: int, month_cost: int,
+                         costs: dict[str, float]) -> tuple[int, dict[str, float]]:
+    if not trans:
+        return month_cost, costs
+    if trans[KEY_TYPE] != TYPE_COST:
+        return month_cost, costs
+    if not _is_month_match(trans, target_year, target_month):
+        return month_cost, costs
+    month_cost += trans[KEY_AMOUNT]
+    _update_costs(costs, trans[KEY_CATEGORY], trans[KEY_AMOUNT])
+    return month_cost, costs
+
+
 def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
     month_cost = 0
     costs: dict[str, float] = {}
     for trans in financial_transactions_storage:
-        if not trans:
-            continue
-        if trans[KEY_TYPE] != TYPE_COST:
-            continue
-        if not _is_month_match(trans, target_year, target_month):
-            continue
-        month_cost += trans[KEY_AMOUNT]
-        _update_costs(costs, trans[KEY_CATEGORY], trans[KEY_AMOUNT])
+        month_cost, costs = _process_single_cost(
+            trans, target_year, target_month, month_cost, costs
+        )
     return month_cost, costs
 
 
