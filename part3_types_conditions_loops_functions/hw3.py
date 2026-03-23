@@ -57,11 +57,14 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     if flag:
         return None
 
-    if int(parts[0]) < 1 or int(parts[1]) < 1:
+    if int(parts[0]) < 1:
         flag = 1
-    if int(parts[1]) > CONST12 or int(parts[2]) < 1:
+    if int(parts[1]) < 1:
         flag = 1
-
+    if int(parts[1]) > CONST12:
+        flag = 1
+    if int(parts[2]) < 1:
+        flag = 1
 
     days_in_month = [
         0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
@@ -74,8 +77,9 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
 
     if flag:
         return None
+    ans1 = int(parts[0])
 
-    return int(parts[0]), int(parts[1]), int(parts[2])
+    return ans1, int(parts[1]), int(parts[2])
 
 
 def income_handler(amount: float, income_date: str) -> str:
@@ -125,9 +129,18 @@ def cost_categories_handler() -> str:
 
 
 def _is_date_after(date1: tuple[int, int, int],
-                   date2: tuple[int, int, int]
-                   ) -> bool:
-    return (date1[2], date1[1], date1[0]) > (date2[2], date2[1], date2[0])
+                   date2: tuple[int, int, int]) -> bool:
+    if date1[2] > date2[2]:
+        return True
+    if date1[2] < date2[2]:
+        return False
+
+    if date1[1] > date2[1]:
+        return True
+    if date1[1] < date2[1]:
+        return False
+
+    return date1[0] > date2[0]
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
