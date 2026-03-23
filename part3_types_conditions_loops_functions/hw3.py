@@ -191,7 +191,7 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
 
 def _is_month_match(transaction: dict[str, Any], target_year: int, target_month: int) -> bool:
     _, month, year = transaction[KEY_DATE]
-    return year == target_year and month == target_month
+    return bool(year == target_year and month == target_month)
 
 
 def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
@@ -224,7 +224,7 @@ def _is_valid_cost_transaction(trans: dict[str, Any], target_year: int,
         return False
     if trans[KEY_TYPE] != TYPE_COST:
         return False
-    return _is_month_match(trans, target_year, target_month)
+    return bool(_is_month_match(trans, target_year, target_month))
 
 
 def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
