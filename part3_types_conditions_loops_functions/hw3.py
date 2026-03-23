@@ -40,6 +40,16 @@ def is_leap_year(year: int) -> bool:
     return not (year % 100 == 0 and year % 400 != 0)
 
 
+def _is_valid_values(parts: list[str]) -> bool:
+    if int(parts[0]) < 1:
+        return False
+    if int(parts[1]) < 1:
+        return False
+    if int(parts[1]) > CONST12:
+        return False
+    return not int(parts[2]) < 1
+
+
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
     flag = 0
@@ -57,13 +67,7 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     if flag:
         return None
 
-    if int(parts[0]) < 1:
-        flag = 1
-    if int(parts[1]) < 1:
-        flag = 1
-    if int(parts[1]) > CONST12:
-        flag = 1
-    if int(parts[2]) < 1:
+    if not _is_valid_values(parts):
         flag = 1
 
     days_in_month = [
@@ -77,8 +81,8 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
 
     if flag:
         return None
-    ans1 = int(parts[0])
 
+    ans1 = int(parts[0])
     return ans1, int(parts[1]), int(parts[2])
 
 
