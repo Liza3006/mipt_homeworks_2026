@@ -166,11 +166,7 @@ def cost_categories_handler() -> str:
 
 
 def _compare_dates(t_date: tuple[int, int, int], q_date: tuple[int, int, int]) -> bool:
-    if t_date[2] != q_date[2]:
-        return t_date[2] < q_date[2]
-    if t_date[1] != q_date[1]:
-        return t_date[1] < q_date[1]
-    return t_date[0] <= q_date[0]
+    return (t_date[2], t_date[1], t_date[0]) <= (q_date[2], q_date[1], q_date[0])
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
@@ -210,6 +206,10 @@ def _calculate_month_cost(query_date: tuple[int, int, int]) -> MonthCostResult:
     return _process_costs(target_year, target_month)
 
 
+def _update_costs(costs: dict[str, float], category: str, amount: float) -> None:
+    costs[category] = costs.get(category, 0) + amount
+
+
 def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
     month_cost = 0
     costs: dict[str, float] = {}
@@ -221,8 +221,7 @@ def _process_costs(target_year: int, target_month: int) -> MonthCostResult:
         if not _is_month_match(trans, target_year, target_month):
             continue
         month_cost += trans[KEY_AMOUNT]
-        cat = trans[KEY_CATEGORY]
-        costs[cat] = costs.get(cat, 0) + trans[KEY_AMOUNT]
+        _update_costs(costs, trans[KEY_CATEGORY], trans[KEY_AMOUNT])
     return month_cost, costs
 
 
