@@ -116,8 +116,12 @@ def cost_categories_handler() -> str:
     return "\n".join(lines)
 
 
-def _is_date_after(date1: tuple[int, int, int], date2: tuple[int, int, int]) -> bool:
-    return (date1[2], date1[1], date1[0]) > (date2[2], date2[1], date2[0])
+def _is_date_after(date1: tuple[int, int, int],
+                   date2: tuple[int, int, int]
+                   ) -> bool:
+    year1, month1, day1 = date1[2], date1[1], date1[0]
+    year2, month2, day2 = date2[2], date2[1], date2[0]
+    return (year1, month1, day1) > (year2, month2, day2)
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
@@ -141,18 +145,27 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
         if not transaction:
             continue
         _, month, year = transaction[DATE]
-        if transaction[TYPE] != INCOME:
-            continue
-        if year == query_date[2] and month == query_date[1]:
+        if (transaction[TYPE] == INCOME
+                and year == query_date[2]
+                and month == query_date[1]):
             month_income += transaction[AMOUNT]
     return month_income
 
 
-def _is_same_month(date: tuple[int, int, int], query: tuple[int, int, int]) -> bool:
-    return date[1] == query[1] and date[2] == query[2]
+def _is_same_month(
+        date: tuple[int, int, int],
+        query: tuple[int, int, int]
+) -> bool:
+    month = date[1]
+    year = date[2]
+    q_month = query[1]
+    q_year = query[2]
+    return month == q_month and year == q_year
 
 
-def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict[str, float]]:
+def _calculate_month_cost(
+        query_date: tuple[int, int, int]
+) -> tuple[float, dict[str, float]]:
     month_cost = 0
     costs: dict[str, float] = {}
     for transaction in financial_transactions_storage:
