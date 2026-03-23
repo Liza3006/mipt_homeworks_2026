@@ -42,32 +42,37 @@ def is_leap_year(year: int) -> bool:
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
+    flag = 0
 
-    if (len(parts) != CONST3) or not all(part.isdigit() for part in parts):
-        return None
-
-    day = int(parts[0])
-    month = int(parts[1])
-    year = int(parts[2])
+    if len(parts) != CONST3:
+        flag = 1
+    if not all(part.isdigit() for part in parts):
+        flag = 1
 
     if (len(parts[0]) != CONST2 or
             len(parts[1]) != CONST2 or
             len(parts[2]) != CONST4):
-        return None
+        flag = 1
 
-    if day < 1 or month < 1 or month > CONST12 or year < 1:
-        return None
+    if int(parts[0]) < 1 or int(parts[1]) < 1:
+        flag = 1
+    if int(parts[1]) > CONST12 or int(parts[2]) < 1:
+        flag = 1
+
 
     days_in_month = [
         0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
     ]
-    if is_leap_year(year):
+    if is_leap_year(int(parts[2])):
         days_in_month[2] = 29
 
-    if day > days_in_month[month]:
+    if int(parts[0]) > days_in_month[int(parts[1])]:
+        flag = 1
+
+    if flag:
         return None
 
-    return (day, month, year)
+    return int(parts[0]), int(parts[1]), int(parts[2])
 
 
 def income_handler(amount: float, income_date: str) -> str:
@@ -119,9 +124,7 @@ def cost_categories_handler() -> str:
 def _is_date_after(date1: tuple[int, int, int],
                    date2: tuple[int, int, int]
                    ) -> bool:
-    year1, month1, day1 = date1[2], date1[1], date1[0]
-    year2, month2, day2 = date2[2], date2[1], date2[0]
-    return (year1, month1, day1) > (year2, month2, day2)
+    return (date1[2], date1[1], date1[0]) > (date2[2], date2[1], date2[0])
 
 
 def _calculate_capital(query_date: tuple[int, int, int]) -> float:
