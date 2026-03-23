@@ -203,35 +203,35 @@ def _calculate_month_cost(
     return month_cost, costs
 
 
+def _format_budget_line(month_income: float, month_cost: float) -> str:
+    diff = month_income - month_cost
+    direction = "loss" if diff < 0 else "profit"
+    return f"This month, the {direction} amounted to {abs(diff):.2f} rubles."
+
+
 def stats_handler(report_date: str) -> str:
     query_date = extract_date(report_date)
     if query_date is None:
         return INCORRECT_DATE_MSG
 
-    capital = _calculate_capital(query_date)
     month_income = _calculate_month_income(query_date)
     month_cost, costs = _calculate_month_cost(query_date)
 
-    budget = month_income - month_cost
-    direction = "loss" if budget < 0 else "profit"
-
     lines = [
         f"Your statistics as of {report_date}:",
-        f"Total capital: {capital:.2f} rubles",
-        f"This month, the {direction} amounted to {abs(budget):.2f} rubles.",
+        f"Total capital: {_calculate_capital(query_date):.2f} rubles",
+        _format_budget_line(month_income, month_cost),
         f"Income: {month_income:.2f} rubles",
         f"Expenses: {month_cost:.2f} rubles",
         "",
         "Details (category: amount):",
     ]
 
-    if costs:
-        sorted_items = sorted(costs.items(), key=lambda x: x[0])
-        for idx, (category, value) in enumerate(sorted_items, 1):
-            if value == int(value):
-                lines.append(f"{idx}. {category}: {int(value)}")
-            else:
-                lines.append(f"{idx}. {category}: {value}")
+    for idx, (category, value) in enumerate(sorted(costs.items()), 1):
+        if value == int(value):
+            lines.append(f"{idx}. {category}: {int(value)}")
+        else:
+            lines.append(f"{idx}. {category}: {value}")
 
     return "\n".join(lines)
 
