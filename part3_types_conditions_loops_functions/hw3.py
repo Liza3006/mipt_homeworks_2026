@@ -21,6 +21,9 @@ COST_ARGS = 4
 COST_CATEGORIES_ARGS = 2
 STATS_ARGS = 2
 
+FEBRUARY_MONTH = 2
+FEBRUARY_LEAP_DAYS = 29
+
 KEY_TYPE = "type"
 KEY_AMOUNT = "amount"
 KEY_DATE = "date"
@@ -29,7 +32,9 @@ KEY_CATEGORY = "category"
 TYPE_INCOME = "income"
 TYPE_COST = "cost"
 
-DAYS_IN_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+DAYS_IN_MONTH = [
+    0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+]
 
 EXPENSE_CATEGORIES = {
     "Food": ("Supermarket", "Restaurants", "FastFood", "Coffee", "Delivery"),
@@ -76,8 +81,8 @@ def _check_date_range(day: int, month: int, year: int) -> bool:
 
 def _get_days_in_month(month: int, year: int) -> int:
     days = DAYS_IN_MONTH[month]
-    if month == 2 and is_leap_year(year):
-        return 29
+    if month == FEBRUARY_MONTH and is_leap_year(year):
+        return FEBRUARY_LEAP_DAYS
     return days
 
 
