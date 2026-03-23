@@ -98,10 +98,7 @@ def cost_handler(category_name: str, amount: float, income_date: str) -> str:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
     common, target = parts
-    if common not in EXPENSE_CATEGORIES:
-        financial_transactions_storage.append({})
-        return NOT_EXISTS_CATEGORY
-    if target not in EXPENSE_CATEGORIES[common]:
+    if (common not in EXPENSE_CATEGORIES) or target not in EXPENSE_CATEGORIES[common]:
         financial_transactions_storage.append({})
         return NOT_EXISTS_CATEGORY
 
@@ -123,13 +120,13 @@ def _calculate_capital(query_date: tuple[int, int, int]) -> float:
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        day, month, year = transaction["date"]
+        day, month, year = transaction[DATE]
         if (year, month, day) > (query_date[2], query_date[1], query_date[0]):
             continue
-        if transaction["type"] == "income":
-            capital += transaction["amount"]
+        if transaction[TYPE] == "income":
+            capital += transaction[AMOUNT]
         else:
-            capital -= transaction["amount"]
+            capital -= transaction[AMOUNT]
     return capital
 
 
@@ -138,11 +135,11 @@ def _calculate_month_income(query_date: tuple[int, int, int]) -> float:
     for transaction in financial_transactions_storage:
         if not transaction:
             continue
-        _, month, year = transaction["date"]
-        if transaction["type"] != "income":
+        _, month, year = transaction[DATE]
+        if transaction[TYPE] != "income":
             continue
         if year == query_date[2] and month == query_date[1]:
-            month_income += transaction["amount"]
+            month_income += transaction[AMOUNT]
     return month_income
 
 
@@ -154,12 +151,12 @@ def _calculate_month_cost(query_date: tuple[int, int, int]) -> tuple[float, dict
             continue
         if transaction["type"] != "cost":
             continue
-        if (transaction["date"][2] == query_date[2]
-                and transaction["date"][1] == query_date[1]):
-            month_cost += transaction["amount"]
+        if (transaction[DATE][2] == query_date[2]
+                and transaction[DATE][1] == query_date[1]):
+            month_cost += transaction[AMOUNT]
             category = transaction["category"]
             costs[category] = (costs.get(category, 0)
-                               + transaction["amount"])
+                               + transaction[AMOUNT])
     return month_cost, costs
 
 
