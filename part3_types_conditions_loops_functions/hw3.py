@@ -209,6 +209,16 @@ def _format_budget_line(month_income: float, month_cost: float) -> str:
     return f"This month, the {direction} amounted to {abs(diff):.2f} rubles."
 
 
+def _format_cost_lines(costs: dict[str, float]) -> list[str]:
+    lines = []
+    for idx, (category, value) in enumerate(sorted(costs.items()), 1):
+        if value == int(value):
+            lines.append(f"{idx}. {category}: {int(value)}")
+        else:
+            lines.append(f"{idx}. {category}: {value}")
+    return lines
+
+
 def stats_handler(report_date: str) -> str:
     query_date = extract_date(report_date)
     if query_date is None:
@@ -227,12 +237,7 @@ def stats_handler(report_date: str) -> str:
         "Details (category: amount):",
     ]
 
-    for idx, (category, value) in enumerate(sorted(costs.items()), 1):
-        if value == int(value):
-            lines.append(f"{idx}. {category}: {int(value)}")
-        else:
-            lines.append(f"{idx}. {category}: {value}")
-
+    lines.extend(_format_cost_lines(costs))
     return "\n".join(lines)
 
 
