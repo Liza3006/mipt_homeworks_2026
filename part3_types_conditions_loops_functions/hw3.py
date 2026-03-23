@@ -27,6 +27,12 @@ CATEGORY = "category"
 INCOME = "income"
 COST = "cost"
 
+CONST2 = 2
+CONST3 = 3
+CONST4 = 4
+CONST12 = 12
+
+
 financial_transactions_storage: list[dict[str, Any]] = []
 
 
@@ -36,19 +42,19 @@ def is_leap_year(year: int) -> bool:
 
 def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
-    if (len(parts) != 3) or not all(part.isdigit() for part in parts):
+    if (len(parts) != CONST3) or not all(part.isdigit() for part in parts):
         return None
 
     day = int(parts[0])
     month = int(parts[1])
     year = int(parts[2])
 
-    if (len(parts[0]) != 2 or
-            len(parts[1]) != 2 or
-            len(parts[2]) != 4):
+    if (len(parts[0]) != CONST2 or
+            len(parts[1]) != CONST2 or
+            len(parts[2]) != CONST4):
         return None
 
-    if day < 1 or month < 1 or month > 12 or year < 1:
+    if day < 1 or month < 1 or month > CONST12 or year < 1:
         return None
 
     days_in_month = [
