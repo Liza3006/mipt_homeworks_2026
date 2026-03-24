@@ -31,7 +31,7 @@ DATE_LEN = 2
 DATE_PART = 3
 YEAR_LEN = 4
 MAX_MONTH = 12
-
+FLOAT_PARTS_LEN = 2
 
 financial_transactions_storage: list[dict[str, Any]] = []
 
@@ -259,13 +259,10 @@ def _handle_income(parts: list[str]) -> None:
 def _is_valid_amount(amount: str) -> bool:
     new_amount = amount.replace(",", ".")
     parts = new_amount.split(".")
-    if len(parts) > 2:
+    if len(parts) > FLOAT_PARTS_LEN:
         print(UNKNOWN_COMMAND_MSG)
-    for part in parts:
-        if not part.isdigit():
-            return False
+    return all(part.isdigit() for part in parts)
 
-    return True
 
 def _handle_cost(parts: list[str]) -> None:
     cost_categories_args = 2
