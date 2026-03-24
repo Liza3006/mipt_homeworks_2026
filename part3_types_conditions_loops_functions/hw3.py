@@ -27,25 +27,25 @@ CATEGORY = "category"
 INCOME = "income"
 COST = "cost"
 
-CONST2 = 2
-CONST3 = 3
-CONST4 = 4
-CONST12 = 12
+DATE_LEN = 2
+DATE_PART = 3
+YEAR_LEN = 4
+MAX_MONTH = 12
 
 
 financial_transactions_storage: list[dict[str, Any]] = []
 
 
 def is_leap_year(year: int) -> bool:
-    return not (year % 100 == 0 and year % 400 != 0)
+    return (year % 4 == 0 and year % 100 != 0) or (year % 400 != 0)
 
 
-def _is_valid_values(parts: list[str]) -> bool:
+def _is_valid_date_values(parts: list[str]) -> bool:
     if int(parts[0]) < 1:
         return False
     if int(parts[1]) < 1:
         return False
-    if int(parts[1]) > CONST12:
+    if int(parts[1]) > MAX_MONTH:
         return False
     return not int(parts[2]) < 1
 
@@ -54,20 +54,20 @@ def extract_date(maybe_dt: str) -> tuple[int, int, int] | None:
     parts = maybe_dt.split("-")
     flag = 0
 
-    if len(parts) != CONST3:
+    if len(parts) != DATE_PART:
         flag = 1
     if not all(part.isdigit() for part in parts):
         flag = 1
 
-    if (len(parts[0]) != CONST2 or
-            len(parts[1]) != CONST2 or
-            len(parts[2]) != CONST4):
+    if (len(parts[0]) != DATE_LEN or
+            len(parts[1]) != DATE_LEN or
+            len(parts[2]) != YEAR_LEN):
         flag = 1
 
     if flag:
         return None
 
-    if not _is_valid_values(parts):
+    if not _is_valid_date_values(parts):
         flag = 1
 
     days_in_month = [
@@ -246,10 +246,26 @@ def _handle_income(parts: list[str]) -> None:
     if len(parts) != income_args:
         print(UNKNOWN_COMMAND_MSG)
         return
+
+    if not(_is_valid_amount(parts[1])):
+        print(UNKNOWN_COMMAND_MSG)
+        return
+
     amount = float(parts[1].replace(",", "."))
     result = income_handler(amount, parts[2])
     print(result)
 
+
+def _is_valid_amount(amount: str) -> bool:
+    new_amount = amount.replace(",", ".")
+    parts = new_amount.split(".")
+    if len(parts) > 2:
+        print(UNKNOWN_COMMAND_MSG)
+    for part in parts:
+        if not part.isdigit():
+            return False
+
+    return True
 
 def _handle_cost(parts: list[str]) -> None:
     cost_categories_args = 2
@@ -260,6 +276,11 @@ def _handle_cost(parts: list[str]) -> None:
     if len(parts) != cost_args:
         print(UNKNOWN_COMMAND_MSG)
         return
+
+    if not(_is_valid_amount(parts[2])):
+        print(UNKNOWN_COMMAND_MSG)
+        return
+
     amount = float(parts[2].replace(",", "."))
     result = cost_handler(parts[1], amount, parts[3])
     print(result)
