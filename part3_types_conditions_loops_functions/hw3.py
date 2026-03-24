@@ -37,7 +37,9 @@ financial_transactions_storage: list[dict[str, Any]] = []
 
 
 def is_leap_year(year: int) -> bool:
-    return (year % 4 == 0 and year % 100 != 0) or (year % 400 != 0)
+    if year % 100 == 0:
+        return year % 400 == 0
+    return year % 4 == 0
 
 
 def _is_valid_date_values(parts: list[str]) -> bool:
@@ -247,7 +249,7 @@ def _handle_income(parts: list[str]) -> None:
         print(UNKNOWN_COMMAND_MSG)
         return
 
-    if not(_is_valid_amount(parts[1])):
+    if not (_is_valid_amount(parts[1])):
         print(UNKNOWN_COMMAND_MSG)
         return
 
@@ -274,7 +276,7 @@ def _handle_cost(parts: list[str]) -> None:
         print(UNKNOWN_COMMAND_MSG)
         return
 
-    if not(_is_valid_amount(parts[2])):
+    if not (_is_valid_amount(parts[2])):
         print(UNKNOWN_COMMAND_MSG)
         return
 
