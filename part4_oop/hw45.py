@@ -1,3 +1,4 @@
+import operator
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any, TypeVar
@@ -96,8 +97,7 @@ class LFUPolicy(Policy[K]):
         if len(self._key_counter) >= self.capacity and self._key_counter:
             self._pending_evict_key = min(
                 self._key_counter.items(),
-                key=lambda item: item[1],
-            )[0]
+                key=operator.itemgetter(1))[0]
         self._key_counter[key] = 1
 
     def get_key_to_evict(self) -> K | None:
