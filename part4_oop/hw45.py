@@ -156,6 +156,7 @@ class MIPTCache(Cache[K, V]):
         self.storage.clear()
         self.policy.clear()
 
+
 class CachedProperty[V]:
     def __init__(self, func: Callable[..., V]) -> None:
         self._func = func
@@ -172,4 +173,3 @@ class CachedProperty[V]:
         value = self._func(instance)
         instance.cache.set(self._cache_key, value)
         return value
-
