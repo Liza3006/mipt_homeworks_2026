@@ -51,39 +51,38 @@ class CircuitBreaker:
         self._blocked_until: datetime | None = None
         self._block_time: datetime | None = None
 
+    def _check_block(self, now: datetime, func_name: str) -> None:
+        if self._blocked_until is None:
+            return
+        if now < self._blocked_until:
+            raise BreakerError(func_name=func_name, block_time=self._block_time)
+        self._blocked_until = None
+        self._block_time = None
+        self._failed_count = 0
+
+    def _handle_error(self, error: Exception, func_name: str) -> None:
+        self._failed_count += 1
+        if self._failed_count >= self.critical_count:
+            block_time = datetime.now(UTC)
+            self._block_time = block_time
+            self._blocked_until = block_time + timedelta(seconds=self.time_to_recover)
+            self._failed_count = 0
+            raise BreakerError(func_name=func_name, block_time=block_time) from error
+        raise error
+
     def __call__(self, func: CallableWithMeta[P, R_co]) -> CallableWithMeta[P, R_co]:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R_co:
             now = datetime.now(UTC)
-
-            if self._blocked_until is not None:
-                if now < self._blocked_until:
-                    raise BreakerError(
-                        func_name=f"{func.__module__}.{func.__name__}",
-                        block_time=self._block_time,
-                    )
-                self._blocked_until = None
-                self._block_time = None
-                self._failed_count = 0
+            func_name = f"{func.__module__}.{func.__name__}"
+            self._check_block(now, func_name)
 
             try:
-                result = func(*args, **kwargs)
+                return func(*args, **kwargs)
             except Exception as error:
                 if isinstance(error, self.triggers_on):
-                    self._failed_count += 1
-                    if self._failed_count >= self.critical_count:
-                        block_time = datetime.now(UTC)
-                        self._block_time = block_time
-                        self._blocked_until = block_time + timedelta(seconds=self.time_to_recover)
-                        self._failed_count = 0
-                        raise BreakerError(
-                            func_name=f"{func.__module__}.{func.__name__}",
-                            block_time=block_time,
-                        ) from error
+                    self._handle_error(error, func_name)
                 raise
-
-            self._failed_count = 0
-            return result
 
         return wrapper
 
