@@ -51,25 +51,6 @@ class CircuitBreaker:
         self._blocked_until: datetime | None = None
         self._block_time: datetime | None = None
 
-    def _check_block(self, now: datetime, func_name: str) -> None:
-        if self._blocked_until is None:
-            return
-        if now < self._blocked_until:
-            raise BreakerError(func_name=func_name, block_time=self._block_time)
-        self._blocked_until = None
-        self._block_time = None
-        self._failed_count = 0
-
-    def _handle_error(self, error: Exception, func_name: str) -> None:
-        self._failed_count += 1
-        if self._failed_count >= self.critical_count:
-            block_time = datetime.now(UTC)
-            self._block_time = block_time
-            self._blocked_until = block_time + timedelta(seconds=self.time_to_recover)
-            self._failed_count = 0
-            raise BreakerError(func_name=func_name, block_time=block_time) from error
-        raise error
-
     def __call__(self, func: CallableWithMeta[P, R_co]) -> CallableWithMeta[P, R_co]:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R_co:
@@ -88,6 +69,25 @@ class CircuitBreaker:
             return result
 
         return wrapper
+
+    def _check_block(self, now: datetime, func_name: str) -> None:
+        if self._blocked_until is None:
+            return
+        if now < self._blocked_until:
+            raise BreakerError(func_name=func_name, block_time=self._block_time)
+        self._blocked_until = None
+        self._block_time = None
+        self._failed_count = 0
+
+    def _handle_error(self, error: Exception, func_name: str) -> None:
+        self._failed_count += 1
+        if self._failed_count >= self.critical_count:
+            block_time = datetime.now(UTC)
+            self._block_time = block_time
+            self._blocked_until = block_time + timedelta(seconds=self.time_to_recover)
+            self._failed_count = 0
+            raise BreakerError(func_name=func_name, block_time=block_time) from error
+        raise error
 
 
 circuit_breaker = CircuitBreaker(5, 30, Exception)
