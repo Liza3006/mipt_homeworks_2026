@@ -74,7 +74,10 @@ class CircuitBreaker:
         if self._blocked_until is None:
             return
         if now < self._blocked_until:
-            raise BreakerError(func_name=func_name, block_time=self._block_time)
+            block_time = self._block_time
+            if block_time is None:
+                block_time = self._blocked_until - timedelta(seconds=self.time_to_recover)
+            raise BreakerError(func_name=func_name, block_time=block_time)
         self._blocked_until = None
         self._block_time = None
         self._failed_count = 0
