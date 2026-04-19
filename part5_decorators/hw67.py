@@ -78,11 +78,14 @@ class CircuitBreaker:
             self._check_block(now, func_name)
 
             try:
-                return func(*args, **kwargs)
+                result = func(*args, **kwargs)
             except Exception as error:
                 if isinstance(error, self.triggers_on):
                     self._handle_error(error, func_name)
                 raise
+
+            self._failed_count = 0
+            return result
 
         return wrapper
 
