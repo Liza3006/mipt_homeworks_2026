@@ -191,6 +191,8 @@ cython_debug/
 # Ruff stuff:
 .ruff_cache/
 
+final_project/config.yaml
+
 # PyPI configuration file
 .pypirc
 

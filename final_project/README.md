@@ -1,12 +1,28 @@
-# Итоговый проект "GigaVibeMiptCode"
+ИИ-ассистент
 
-Актуальный текст задания доступен [здесь](https://docs.google.com/document/d/1hjEwsQd8m6-esJA37ZkGNIwK9Rn2edBC0MozFxpqxRg/edit?usp=sharing).
+Переменные окружения:
 
-**Дедлайн загрузки решений: 23:59 22 мая.**
+- API_KEY
+- API_HOST
+- LIMIT_MESSAGE
+- LIMIT_CHARS
+- TEMPERATURE
 
-В рамках проекта вам предстоит создать собственного ИИ-ассистента с консольным интерфейсом, который будет обрабатывать пользовательский ввод, отправлять запросы к LLM и выводить пользователю ответы в разных режимах.
+config.yaml:
 
-Решения необходимо подгрузить в форки данного репозитория.
+api_key: ollama
+api_host: http://localhost:11434/v1/
+limit_message: 20
+limit_chars: 2000
+temperature: 0.7
+model: gemma3:4b
+system_prompt: You are a helpful AI assistant.
 
-Требования к линтерам смягчены: используйте ruff check с конфигурацией из нового ruff.toml
-Проверку типов выполняем через простой запуск mypy.
+
+
+Команды:
+- \q — выход
+- /reset — очистить историю и экран
+- /file_chunk, /filechunk — режим обработки файла
+
+
