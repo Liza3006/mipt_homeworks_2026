@@ -4,10 +4,10 @@ from .files import expand_file_markers, read_text_file, chunk_text
 from .llm import LLM
 from .session import ChatSession
 
-def clear_screen():
+def clear_screen() -> None:
     os.system('clear')
 
-def run():
+def run() -> int:
     try:
         config = load_config()
     except ValueError as e:
@@ -52,7 +52,12 @@ def run():
 
             try:
                 text = read_text_file(file_path)
-                chunks = chunk_text(text, mode=mode, paragraph_size=paragraph_size, chunk_length=chunk_len)
+                chunks = chunk_text(
+                    text,
+                    mode=mode,
+                    paragraph_size=paragraph_size,
+                    chunk_length=chunk_len,
+                )
             except (FileNotFoundError, IsADirectoryError, ValueError) as e:
                 print(e)
                 continue

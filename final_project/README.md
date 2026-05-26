@@ -1,6 +1,6 @@
-ИИ-ассистент
+# ИИ-ассистент
 
-Переменные окружения:
+## Переменные окружения:
 
 - API_KEY
 - API_HOST
@@ -20,9 +20,23 @@ system_prompt: You are a helpful AI assistant.
 
 
 
-Команды:
+## Команды:
 - \q — выход
 - /reset — очистить историю и экран
 - /file_chunk, /filechunk — режим обработки файла
 
 
+## Установка:
+- brew install ollama
+- ollama pull gemma3:4b
+
+## Запуск:
+- ollama serve
+- python main.py
+
+## Файлы проекта
+- cli.py — консольный интерфейс, обработка команд (/reset, /file_chunk и т.д.)
+- config.py — загрузка настроек 
+- files.py — чтение текстовых файлов
+- llm.py — взаимодействие с Ollama
+- session.py — хранение истории сообщений
